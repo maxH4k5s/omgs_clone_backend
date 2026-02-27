@@ -1,4 +1,7 @@
 import mongoose, { Schema } from "mongoose";
+import jwt from "jsonwebtoken";
+import bcrypt from "bcrypt";
+
 
 const addressSchema = new Schema(
   {
@@ -57,6 +60,7 @@ const userSchema = new Schema(
       required: true,
       lowercase: true,
       trim: true,
+      unique: true,
       match: [/^\S+@\S+\.\S+$/, "Invalid email"]
     },
     password: {
@@ -98,7 +102,40 @@ const userSchema = new Schema(
   }
 );
 
-// Explicit unique index (safer in production)
-userSchema.index({ email: 1 }, { unique: true });
+userSchema.pre("save", async function () {
+    if (!this.isModified("password")) return;
+    this.password = await bcrypt.hash(this.password, 12);
+});
+
+userSchema.methods.isPasswordCorrect = async function(password){
+  return await bcrypt.compare(password, this.password);
+}
+
+userSchema.methods.generateAccessToken = function(){
+  return jwt.sign(
+    {
+      sub: this._id,
+      role: this.role,
+    },
+    process.env.ACCESS_TOKEN_SECRET,
+    {
+      expiresIn: process.env.ACCESS_TOKEN_EXPIRY
+    }
+  )
+}
+
+userSchema.methods.generateRefreshToken = function(){
+  return jwt.sign(
+    {
+      sub: this._id,
+    },
+    process.env.REFRESH_TOKEN_SECRET,
+    {
+      expiresIn: process.env.REFRESH_TOKEN_EXPIRY
+    }
+  )
+}
+
+
 
 export default mongoose.model("User", userSchema);
