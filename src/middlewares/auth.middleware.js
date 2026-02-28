@@ -26,3 +26,10 @@ export const verifyJWT = asyncHandler(async(req, _, next) => {
     }
     
 })
+
+export const isAdmin = asyncHandler(async (req, _, next) => {
+    if (req.user?.role !== "admin") {
+        throw new ApiError(403, "Access denied. Admin role required.");
+    }
+    next();
+});

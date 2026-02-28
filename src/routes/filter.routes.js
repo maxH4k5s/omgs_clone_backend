@@ -5,7 +5,7 @@ import {
     getFiltersByCategory, 
     updateFilter 
 } from "../controllers/filter.controller.js";
-import { verifyJWT } from "../middlewares/auth.middleware.js";
+import { verifyJWT, isAdmin } from "../middlewares/auth.middleware.js";
 
 const router = Router();
 
@@ -13,8 +13,8 @@ const router = Router();
 router.route("/category/:categoryId").get(getFiltersByCategory);
 
 // Protected routes
-router.route("/").post(verifyJWT, createFilter);
-router.route("/:filterId").patch(verifyJWT, updateFilter);
-router.route("/:filterId").delete(verifyJWT, deleteFilter);
+router.route("/").post(verifyJWT, isAdmin, createFilter);
+router.route("/:filterId").patch(verifyJWT, isAdmin, updateFilter);
+router.route("/:filterId").delete(verifyJWT, isAdmin, deleteFilter);
 
 export default router;

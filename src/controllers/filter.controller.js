@@ -58,7 +58,7 @@ const updateFilter = asyncHandler(async (req, res) => {
     );
 
     return res.status(200).json(
-                new ApiResponse(200, updatedFilter, "Filter updated successfully")
+        new ApiResponse(200, updatedFilter, "Filter updated successfully")
     );
 });
 
